@@ -251,21 +251,75 @@ textarea:disabled {
   align-self: flex-start;
 }
 
-.msg-tool_call {
-  align-self: center;
-  max-width: 90%;
-  border-color: #3d3353;
-  background: #1c1e2e;
-}
-
+.msg-tool_call,
 .msg-tool_result {
-  align-self: center;
-  max-width: 90%;
-  border-color: #263626;
-  background: #16211e;
+  align-self: flex-start;
+  max-width: 85%;
+  background: transparent;
+  border: none;
+  border-left: 2px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 0;
 }
 
-.msg-tool_result .msg-error {
+.msg-tool-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 0;
+}
+
+.msg-tool-header:hover {
+  opacity: 0.75;
+}
+
+.msg-tool-name,
+.msg-tool-preview {
+  font-size: 13px;
+  color: var(--text);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msg-chevron {
+  font-size: 14px;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+  flex: none;
+  line-height: 1;
+}
+
+.msg-tool_call.expanded .msg-chevron,
+.msg-tool_result.expanded .msg-chevron {
+  transform: rotate(90deg);
+}
+
+.msg-tool-content {
+  display: none;
+  margin-top: 4px;
+  padding: 6px 8px;
+  background: var(--panel);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--muted);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.msg-tool_call.expanded .msg-tool-content,
+.msg-tool_result.expanded .msg-tool-content {
+  display: block;
+}
+
+.msg-tool_result .msg-error,
+.msg-tool-header.msg-error .msg-tool-preview {
   color: var(--danger);
 }
 

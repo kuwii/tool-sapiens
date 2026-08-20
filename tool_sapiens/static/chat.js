@@ -100,23 +100,46 @@ async function sendPrompt() {
 function appendEvent(event) {
   const block = el('div', 'msg msg-' + event.type);
   if (event.type === 'tool_call') {
-    block.appendChild(el('div', 'msg-role', '工具调用'));
     const paramsText = JSON.stringify(event.params, null, 2);
-    const body = el('div', 'msg-text', `${event.name}\n${paramsText}`);
-    block.appendChild(body);
+    const header = document.createElement('div');
+    header.className = 'msg-tool-header';
+    header.innerHTML = '<span class="msg-role">工具调用</span><span class="msg-tool-name">' + escapeHtml(event.name) + '</span><span class="msg-chevron">›</span>';
+    const content = document.createElement('div');
+    content.className = 'msg-tool-content';
+    content.textContent = paramsText;
+    header.addEventListener('click', function () {
+      block.classList.toggle('expanded');
+    });
+    block.appendChild(header);
+    block.appendChild(content);
   } else if (event.type === 'tool_result') {
-    block.appendChild(el('div', 'msg-role', '工具结果'));
     const result = event.result;
+    let resultText = '';
+    let isError = false;
     if (result && result.ok) {
-      const body = el('div', 'msg-text', `${result.text}`);
-      block.appendChild(body);
+      resultText = result.text || '';
     } else if (result) {
-      const body = el('div', 'msg-text msg-error', `失败：${result.text}`);
-      block.appendChild(body);
+      resultText = '失败：' + (result.text || '');
+      isError = true;
     } else {
-      const body = el('div', 'msg-text', '(无结果)');
-      block.appendChild(body);
+      resultText = '(无结果)';
     }
+    const firstLine = resultText.split('\n')[0] || '';
+    const preview = firstLine.length > 80 ? firstLine.slice(0, 80) + '…' : firstLine;
+    const header = document.createElement('div');
+    header.className = 'msg-tool-header';
+    header.innerHTML = '<span class="msg-role">工具结果</span><span class="msg-tool-preview">' + escapeHtml(preview) + '</span><span class="msg-chevron">›</span>';
+    if (isError) {
+      header.classList.add('msg-error');
+    }
+    const content = document.createElement('div');
+    content.className = 'msg-tool-content' + (isError ? ' msg-error' : '');
+    content.textContent = resultText;
+    header.addEventListener('click', function () {
+      block.classList.toggle('expanded');
+    });
+    block.appendChild(header);
+    block.appendChild(content);
   } else {
     const roleLabel = event.type === 'user_prompt' ? '用户' : 'LLM';
     block.appendChild(el('div', 'msg-role', roleLabel));
@@ -125,6 +148,12 @@ function appendEvent(event) {
   }
   logEl.appendChild(block);
   logEl.scrollTop = logEl.scrollHeight;
+}
+
+function escapeHtml(text) {
+  var div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 async function poll() {
