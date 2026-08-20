@@ -4,6 +4,8 @@
 
 一个人力 agent：软件是 agent，但"智能"部分由人扮演——agent loop 中调用 LLM API 的环节，改为向人类展示提示词、由人类输入"响应"。
 
+![](./docs/the-demo.gif)
+
 ## 启动
 
 ```bash
