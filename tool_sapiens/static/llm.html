@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tool Sapiens · LLM</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="page-llm">
+  <header class="topbar">
+    <div class="brand">Tool Sapiens <span class="slogan">你现在就是大模型</span></div>
+    <nav class="topbar-links">
+      <a id="chat-link" href="/" hidden>聊天页</a>
+      <span class="current">LLM 页</span>
+    </nav>
+  </header>
+  <div id="session-state" class="session-state">加载中……</div>
+  <div class="columns">
+    <section class="panel">
+      <h2>给 LLM 的输入</h2>
+      <pre id="llm-input" class="llm-input">加载中……</pre>
+    </section>
+    <section class="panel">
+      <h2>你的响应</h2>
+      <div id="last-error" class="error" hidden></div>
+      <textarea id="response-input" class="response-input"
+        placeholder="tag 外的文本就是你的输出；需要调用工具时按 system prompt 里的格式写 tag。"></textarea>
+      <button id="submit-btn" class="btn primary">提交响应</button>
+    </section>
+  </div>
+  <script src="/static/common.js"></script>
+  <script src="/static/llm.js"></script>
+</body>
+</html>

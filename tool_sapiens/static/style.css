@@ -1,0 +1,378 @@
+/* Tool Sapiens 基础样式：双页面共用，深色极简。 */
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #101418;
+  --panel: #1a2129;
+  --border: #2c3947;
+  --text: #e6edf3;
+  --muted: #8b98a5;
+  --accent: #4cc2ff;
+  --accent-ink: #04121c;
+  --danger: #ff7b72;
+  --user: #d8e7ff;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* 顶栏 */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  flex: none;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.slogan {
+  margin-left: 8px;
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.topbar-links {
+  display: flex;
+  gap: 14px;
+  font-size: 14px;
+}
+
+.topbar-links a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.topbar-links a:hover {
+  text-decoration: underline;
+}
+
+.topbar-links .current {
+  color: var(--muted);
+}
+
+/* 通用控件 */
+
+.btn {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.btn.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.btn.danger:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+textarea {
+  width: 100%;
+  resize: none;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  font: inherit;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+textarea:disabled {
+  opacity: 0.55;
+}
+
+/* 双栏骨架 */
+
+.columns {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  gap: 14px;
+  padding: 14px;
+}
+
+/* 聊天页 */
+
+.side {
+  flex: none;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.session-label {
+  font-size: 13px;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+.side-note {
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.session-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+}
+
+.session-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid transparent;
+}
+
+.session-item:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.session-item.active {
+  background: var(--bg);
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 10px;
+}
+
+.chat-log {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 2px;
+}
+
+.msg {
+  max-width: 78%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.msg-role {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.msg-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.msg-user_prompt {
+  align-self: flex-end;
+  border-color: #3b5a80;
+}
+
+.msg-user_prompt .msg-text {
+  color: var(--user);
+}
+
+.msg-llm_output {
+  align-self: flex-start;
+}
+
+.msg-tool_call {
+  align-self: center;
+  max-width: 90%;
+  border-color: #3d3353;
+  background: #1c1e2e;
+}
+
+.msg-tool_result {
+  align-self: center;
+  max-width: 90%;
+  border-color: #263626;
+  background: #16211e;
+}
+
+.msg-tool_result .msg-error {
+  color: var(--danger);
+}
+
+.status {
+  flex: none;
+  min-height: 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.input-area {
+  flex: none;
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.input-area textarea {
+  flex: 1;
+}
+
+.input-area.disabled .btn {
+  opacity: 0.45;
+}
+
+/* LLM 页 */
+
+.session-state {
+  flex: none;
+  padding: 8px 18px;
+  font-size: 13px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.panel h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.llm-input {
+  flex: 1;
+  margin: 0;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.response-input {
+  flex: 1;
+  min-height: 160px;
+}
+
+.error {
+  flex: none;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+#submit-btn {
+  flex: none;
+  align-self: flex-end;
+}
+
+/* 窄屏退化为上下堆叠 */
+
+@media (max-width: 900px) {
+  .columns {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .side {
+    width: auto;
+  }
+
+  .panel,
+  .main {
+    flex: none;
+  }
+
+  .llm-input,
+  .chat-log {
+    max-height: 40vh;
+  }
+}

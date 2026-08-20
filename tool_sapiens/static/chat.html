@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tool Sapiens · 聊天</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="page-chat">
+  <header class="topbar">
+    <div class="brand">Tool Sapiens <span class="slogan">由能工智人驱动的智能体</span></div>
+    <nav class="topbar-links">
+      <span class="current">聊天页</span>
+      <a id="llm-link" href="/llm">LLM 页</a>
+    </nav>
+  </header>
+  <div class="columns">
+    <aside class="side">
+      <button id="new-session" class="btn primary">新建 session</button>
+      <div id="session-list" class="session-list"></div>
+    </aside>
+    <main class="main">
+      <div id="chat-log" class="chat-log" aria-live="polite"></div>
+      <div id="status" class="status" aria-live="polite"></div>
+      <div id="input-area" class="input-area">
+        <textarea id="prompt-input" rows="3"
+          placeholder="输入提示词，Enter 发送，Shift+Enter 换行"></textarea>
+        <button id="kill-btn" class="btn danger" hidden>终止</button>
+        <button id="send-btn" class="btn primary">发送</button>
+      </div>
+    </main>
+  </div>
+  <script src="/static/common.js"></script>
+  <script src="/static/chat.js"></script>
+</body>
+</html>

@@ -218,3 +218,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Playwright MCP test artifacts
+#   Auto-generated snapshots and screenshots from Playwright MCP server,
+#   plus agent-saved temporary test files under tmp/
+.playwright-mcp/
