@@ -14,8 +14,8 @@ class SubmitPromptTest(unittest.TestCase):
         pending = loop.submit_prompt(self.session, '你好')
         self.assertEqual(self.session['state'], 'awaiting_llm')
         self.assertEqual(pending, self.session['pending_input'])
-        self.assertIn('[system]', pending)
-        self.assertIn('[user]\n你好', pending)
+        self.assertIn('── SYSTEM', pending)
+        self.assertIn('你好', pending)
         self.assertIsNone(self.session['last_error'])
 
     def test_user_prompt_event_appended(self):
@@ -28,8 +28,8 @@ class SubmitPromptTest(unittest.TestCase):
         loop.submit_prompt(self.session, '第一条')
         loop.submit_response(self.session, '收到')
         loop.submit_prompt(self.session, '第二条')
-        self.assertNotIn('[system]', self.session['pending_input'])
-        self.assertIn('[user]\n第二条', self.session['pending_input'])
+        self.assertNotIn('── SYSTEM', self.session['pending_input'])
+        self.assertIn('第二条', self.session['pending_input'])
 
     def test_prompt_is_stripped(self):
         loop.submit_prompt(self.session, '  你好  ')

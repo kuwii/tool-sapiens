@@ -33,9 +33,44 @@ class ParseResult:
         return self.error is None
 
 
+# 角色名 -> 显示标签
+_ROLE_LABELS = {
+    'system': 'SYSTEM',
+    'user': 'USER',
+    'assistant': 'ASSISTANT',
+    'tool': 'TOOL',
+}
+
+
+def _render_part(role: str, content: str) -> str:
+    """将单个部分渲染为 C 字形包围的格式（上、左、下，无右边框）。
+
+    例:
+        ┌── SYSTEM─────────────────────────────
+        │ You are a helpful assistant.
+        └──────────────────────────────────────
+
+    header 宽度对齐到最长内容行（"│ " + content），短则补 ─。
+    """
+    label = _ROLE_LABELS.get(role, role.upper())
+    lines = content.split('\n')
+    max_content_len = max(len(line) for line in lines)
+    # 内容行总长 = "│ "(2) + max_content_len
+    content_line_len = 2 + max_content_len
+    header_prefix = f'── {label}'
+    # 整行最小总长：至少容纳 "┌" + header_prefix，也至少和内容行等宽
+    min_total = max(1 + len(header_prefix), content_line_len)
+    dash_count = min_total - 1 - len(header_prefix)
+    result_lines = ['┌' + header_prefix + '─' * dash_count]
+    for line in lines:
+        result_lines.append(f'│ {line}')
+    result_lines.append('└' + '─' * (min_total - 1))
+    return '\n'.join(result_lines)
+
+
 def render_turn_input(parts) -> str:
     """把本轮输入整合成一个长篇。parts 为 (角色, 内容) 列表。"""
-    return '\n\n'.join(f'[{role}]\n{content}' for role, content in parts)
+    return '\n\n'.join(_render_part(role, content) for role, content in parts)
 
 
 def build_system_prompt(tool_specs) -> str:

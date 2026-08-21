@@ -135,6 +135,13 @@ textarea:disabled {
   opacity: 0.55;
 }
 
+/* LLM 页面 — 等宽字体，方框和 tag 才能对齐 */
+.page-llm pre.llm-input,
+.page-llm textarea.response-input {
+  font-family: 'Courier New', 'Consolas', 'Source Code Pro', monospace;
+  font-size: 14px;
+}
+
 /* 双栏骨架 */
 
 .columns {
@@ -380,7 +387,7 @@ textarea:disabled {
   overflow-y: auto;
   white-space: pre-wrap;
   word-break: break-word;
-  font-family: inherit;
+  font-family: 'Courier New', 'Consolas', 'Source Code Pro', monospace;
   font-size: 14px;
   background: var(--bg);
   border: 1px solid var(--border);
