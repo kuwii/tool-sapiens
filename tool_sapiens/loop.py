@@ -12,6 +12,13 @@ from . import tools
 # 当前可用工具：工具名 -> 参数名列表（全部必填）。
 TOOL_SPECS = tools.TOOL_SPECS
 
+# 首次轮输入前的游戏说明——放在 [system] 标签之外，作为整篇提示词的前缀。
+FIRST_TURN_PREAMBLE = (
+    '接下来我们来玩一个 agent harness 模拟游戏。我来扮演 agent harness 程序，'
+    '你来扮演它背后的 LLM：我会按典型 agent 程序的方式发送结构化的输入，'
+    '你给出 agent 程序需要的结构化输出（思考、回复、工具调用等）。'
+)
+
 
 class LoopError(Exception):
     """状态不允许的操作。status 为对应 HTTP 状态码。"""
@@ -40,7 +47,11 @@ def submit_prompt(session: dict, text: str) -> str:
     if first_turn:
         parts.append(('system', protocol.build_system_prompt(TOOL_SPECS)))
     parts.append(('user', text))
-    session['pending_input'] = protocol.render_turn_input(parts)
+    rendered = protocol.render_turn_input(parts)
+    if first_turn:
+        session['pending_input'] = FIRST_TURN_PREAMBLE + '\n\n' + rendered
+    else:
+        session['pending_input'] = rendered
     session['last_error'] = None
     session['state'] = 'awaiting_llm'
     sessions.flush(session)
