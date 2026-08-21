@@ -43,7 +43,7 @@ def build_system_prompt(tool_specs) -> str:
     lines = [
         '你是 Tool Sapiens 的大模型，这个 agent 的"智能"由你担任。',
         '',
-        '【响应格式】',
+        '## 响应格式',
         '- 直接用文字写出你的思考与对用户的回复；tag 外的文本就是你的输出。',
         '- 需要调用工具时，使用如下形式的 tag：',
         '',
@@ -55,7 +55,7 @@ def build_system_prompt(tool_specs) -> str:
         '全部结果会作为下一轮输入回传给你。',
         '- tag 必须成对写完整；写坏时你会收到错误说明，重写即可。',
         '',
-        '【当前可用工具】',
+        '## 当前可用工具',
     ]
     if tool_specs:
         for name, params in tool_specs.items():

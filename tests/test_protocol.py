@@ -36,7 +36,7 @@ class BuildSystemPromptTest(unittest.TestCase):
         self.assertIn('edit', prompt)
         self.assertIn('<path>', prompt)
         self.assertIn('noop', prompt)
-        self.assertNotIn('【当前可用工具】\n无', prompt)
+        self.assertNotIn('## 当前可用工具\n无', prompt)
 
 
 class ParsePlainTextTest(unittest.TestCase):
