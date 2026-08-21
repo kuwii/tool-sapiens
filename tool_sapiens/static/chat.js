@@ -143,7 +143,7 @@ async function poll() {
   if (listResult.ok && listResult.data.sessions) {
     sessionsList = listResult.data.sessions;
   }
-    renderSessionList(sessionListEl, sessionsList, currentSid);
+    renderSessionList(sessionListEl, sessionsList, currentSid, true);
 
   const sid = getSessionId();
   llmLink.href = '/llm#' + (sid || '');

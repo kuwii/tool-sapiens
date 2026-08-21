@@ -209,6 +209,48 @@ textarea:disabled {
   border-color: var(--accent);
 }
 
+/* session 项内的 label 和删除按钮 */
+
+.session-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 22px;
+}
+
+.session-item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-item-delete {
+  flex: none;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--muted);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.session-item:hover .session-item-delete {
+  display: inline-flex;
+}
+
+.session-item-delete:hover {
+  background: var(--danger);
+  color: var(--accent-ink);
+}
+
 .main {
   flex: 1;
   display: flex;

@@ -51,7 +51,7 @@ function errorMessage(result) {
 
 /* ── 共享：session 列表渲染 ── */
 
-function renderSessionList(container, sessions, currentSid) {
+function renderSessionList(container, sessions, currentSid, showDelete) {
   var seen = new Set();
   var unique = [];
   for (var i = 0; i < sessions.length; i++) {
@@ -65,11 +65,23 @@ function renderSessionList(container, sessions, currentSid) {
     (function (s) {
       var item = el('div', 'session-item' + (s.id === currentSid ? ' active' : ''), '');
       var title = s.title || ('session ' + s.id);
-      item.textContent = title.length > 30 ? title.slice(0, 30) + '\u2026' : title;
+      var label = el('span', 'session-item-label', '');
+      label.textContent = title.length > 30 ? title.slice(0, 30) + '\u2026' : title;
+      item.appendChild(label);
       item.title = title + ' (' + s.id + ')';
       item.addEventListener('click', function () {
         setSessionId(s.id);
       });
+      if (showDelete) {
+        var delBtn = el('span', 'session-item-delete', '\u00d7');
+        delBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (confirm('确定要删除 session「' + title + '」吗？\n此操作不可恢复。')) {
+            api('DELETE', '/api/sessions/' + s.id);
+          }
+        });
+        item.appendChild(delBtn);
+      }
       container.appendChild(item);
     })(unique[j]);
   }

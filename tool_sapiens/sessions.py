@@ -164,3 +164,18 @@ def snapshot(session: dict) -> dict:
 def flush(session: dict):
     """将 session 当前状态强制刷盘（状态变更、事件追加后调用）。"""
     _save_session(session)
+
+
+def delete_session(sid: str) -> bool:
+    """删除 session：从内存和磁盘移除。返回 True 表示成功，False 表示不存在。"""
+    with _LOCK:
+        if sid not in _STORE:
+            return False
+        del _STORE[sid]
+        del _LOCKS[sid]
+    path = _session_file(sid)
+    try:
+        os.unlink(path)
+    except OSError:
+        pass  # 文件已不存在也视为成功
+    return True

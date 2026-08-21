@@ -66,6 +66,17 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(200, self._llm_view(session))
         return self._send_json(404, {'error': f'未知端点：GET {path}'})
 
+    def do_DELETE(self):
+        path = self.path.split('?', 1)[0]
+        match = re.fullmatch(rf'/api/sessions/{_SID}', path)
+        if match:
+            sid = match['sid']
+            ok = sessions.delete_session(sid)
+            if ok:
+                return self._send_json(200, {'ok': True})
+            return self._send_json(404, {'error': f'session {sid} 不存在。'})
+        return self._send_json(404, {'error': f'未知端点：DELETE {path}'})
+
     def do_POST(self):
         path = self.path.split('?', 1)[0]
         if path == '/api/sessions':
