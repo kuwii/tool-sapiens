@@ -352,6 +352,20 @@ textarea:disabled {
   opacity: 0.45;
 }
 
+/* LLM 页 — 内容区（侧栏 + 双栏面板） */
+
+.page-llm .content {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+  gap: 14px;
+}
+
+.page-llm .content > .panel {
+  flex: 1;
+  min-width: 0;
+}
+
 /* LLM 页 */
 
 .session-state {
@@ -428,8 +442,13 @@ textarea:disabled {
   }
 
   .panel,
-  .main {
+  .main,
+  .content > .panel {
     flex: none;
+  }
+
+  .page-llm .content {
+    flex-direction: column;
   }
 
   .llm-input,

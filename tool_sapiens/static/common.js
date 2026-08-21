@@ -48,3 +48,29 @@ function el(tag, className, text) {
 function errorMessage(result) {
   return (result.data && result.data.error) || `请求失败（HTTP ${result.status}）`;
 }
+
+/* ── 共享：session 列表渲染 ── */
+
+function renderSessionList(container, sessions, currentSid) {
+  var seen = new Set();
+  var unique = [];
+  for (var i = 0; i < sessions.length; i++) {
+    if (!seen.has(sessions[i].id)) {
+      seen.add(sessions[i].id);
+      unique.push(sessions[i]);
+    }
+  }
+  container.textContent = '';
+  for (var j = 0; j < unique.length; j++) {
+    (function (s) {
+      var item = el('div', 'session-item' + (s.id === currentSid ? ' active' : ''), '');
+      var title = s.title || ('session ' + s.id);
+      item.textContent = title.length > 30 ? title.slice(0, 30) + '\u2026' : title;
+      item.title = title + ' (' + s.id + ')';
+      item.addEventListener('click', function () {
+        setSessionId(s.id);
+      });
+      container.appendChild(item);
+    })(unique[j]);
+  }
+}

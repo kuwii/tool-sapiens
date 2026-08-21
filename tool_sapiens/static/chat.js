@@ -9,6 +9,7 @@ const sendBtn = document.getElementById('send-btn');
 const newSessionBtn = document.getElementById('new-session');
 const sessionListEl = document.getElementById('session-list');
 const killBtn = document.getElementById('kill-btn');
+const llmLink = document.getElementById('llm-link');
 
 let currentSid = '';
 let renderedEvents = 0;
@@ -57,28 +58,7 @@ function resetView() {
   promptInput.value = '';
 }
 
-function renderSessionList(sessions) {
-  // 去重：sessions 可能含重复（轮询时）
-  const seen = new Set();
-  const unique = [];
-  for (const s of sessions) {
-    if (!seen.has(s.id)) {
-      seen.add(s.id);
-      unique.push(s);
-    }
-  }
-  sessionListEl.textContent = '';
-  for (const s of unique) {
-    const item = el('div', 'session-item' + (s.id === currentSid ? ' active' : ''), '');
-    const title = s.title || `session ${s.id}`;
-    item.textContent = title.length > 30 ? title.slice(0, 30) + '…' : title;
-    item.title = `${title} (${s.id})`;
-    item.addEventListener('click', () => {
-      setSessionId(s.id);
-    });
-    sessionListEl.appendChild(item);
-  }
-}
+/* renderSessionList — 已在 common.js 中提供 */
 
 async function sendPrompt() {
   const text = promptInput.value.trim();
@@ -163,9 +143,10 @@ async function poll() {
   if (listResult.ok && listResult.data.sessions) {
     sessionsList = listResult.data.sessions;
   }
-  renderSessionList(sessionsList);
+    renderSessionList(sessionListEl, sessionsList, currentSid);
 
   const sid = getSessionId();
+  llmLink.href = '/llm#' + (sid || '');
   if (!sid) {
     statusEl.textContent = '请选择或新建一个 session';
     killBtn.hidden = true;

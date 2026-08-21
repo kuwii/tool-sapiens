@@ -7,11 +7,31 @@ const errorEl = document.getElementById('last-error');
 const responseInput = document.getElementById('response-input');
 const submitBtn = document.getElementById('submit-btn');
 const chatLink = document.getElementById('chat-link');
+const newSessionBtn = document.getElementById('new-session');
+const sessionListEl = document.getElementById('session-list');
 
 let currentSid = '';
 let lastPending = null;
 let lastError = undefined; // 与 null 区分：undefined = 还没轮询过
 let submitting = false;
+
+/* ── 新建 session ── */
+
+newSessionBtn.addEventListener('click', async () => {
+  const result = await api('POST', '/api/sessions');
+  if (!result.ok) {
+    sessionStateEl.textContent = errorMessage(result);
+    return;
+  }
+  setSessionId(result.data.session.meta.id);
+  responseInput.value = '';
+  lastPending = null;
+  lastError = undefined;
+  errorEl.hidden = true;
+  sessionStateEl.textContent = '';
+});
+
+/* ── 提交响应 ── */
 
 submitBtn.addEventListener('click', submitResponse);
 
@@ -42,6 +62,8 @@ async function submitResponse() {
   poll(); // 立即刷新，不等下一个轮询周期
 }
 
+/* ── 轮询 ── */
+
 async function poll() {
   const sid = getSessionId();
   if (!sid) {
@@ -63,6 +85,26 @@ async function poll() {
   }
   chatLink.hidden = false;
   chatLink.href = '/#' + sid;
+
+  /* session 列表 */
+  const listResult = await api('GET', '/api/sessions');
+  let sessionsList = [];
+  if (listResult.ok && listResult.data.sessions) {
+    sessionsList = listResult.data.sessions;
+  }
+  renderSessionList(sessionListEl, sessionsList, currentSid);
+
+  /* 检查 session 是否仍存在于列表中 */
+  const exists = sessionsList.some(s => s.id === sid);
+  if (!exists) {
+    currentSid = '';
+    lastPending = null;
+    inputEl.textContent = `session ${sid} 不存在`;
+    sessionStateEl.textContent = '404';
+    setWorking(true);
+    return;
+  }
+
   const result = await api('GET', `/api/llm/${sid}`);
   if (result.status === 404) {
     currentSid = '';

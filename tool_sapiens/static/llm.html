@@ -16,17 +16,23 @@
   </header>
   <div id="session-state" class="session-state">加载中……</div>
   <div class="columns">
-    <section class="panel">
-      <h2>给 LLM 的输入</h2>
-      <pre id="llm-input" class="llm-input">加载中……</pre>
-    </section>
-    <section class="panel">
-      <h2>你的响应</h2>
-      <div id="last-error" class="error" hidden></div>
-      <textarea id="response-input" class="response-input"
-        placeholder="tag 外的文本就是你的输出；需要调用工具时按 system prompt 里的格式写 tag。"></textarea>
-      <button id="submit-btn" class="btn primary">提交响应</button>
-    </section>
+    <aside class="side">
+      <button id="new-session" class="btn primary">新建 session</button>
+      <div id="session-list" class="session-list"></div>
+    </aside>
+    <div class="content">
+      <section class="panel">
+        <h2>给 LLM 的输入</h2>
+        <pre id="llm-input" class="llm-input">加载中……</pre>
+      </section>
+      <section class="panel">
+        <h2>你的响应</h2>
+        <div id="last-error" class="error" hidden></div>
+        <textarea id="response-input" class="response-input"
+          placeholder="tag 外的文本就是你的输出；需要调用工具时按 system prompt 里的格式写 tag。"></textarea>
+        <button id="submit-btn" class="btn primary">提交响应</button>
+      </section>
+    </div>
   </div>
   <script src="/static/common.js"></script>
   <script src="/static/llm.js"></script>
