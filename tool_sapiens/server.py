@@ -63,6 +63,7 @@ class Handler(BaseHTTPRequestHandler):
             if session is None:
                 return self._send_json(404, {'error': f'session {match["sid"]} 不存在。'})
             with sessions.get_lock(match['sid']):
+                loop.check_terminal_task(session)
                 return self._send_json(200, self._llm_view(session))
         return self._send_json(404, {'error': f'未知端点：GET {path}'})
 
