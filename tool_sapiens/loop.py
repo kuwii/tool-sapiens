@@ -121,9 +121,9 @@ def submit_response(session: dict, text: str):
         tool_result = tools.execute(call.name, call.params)
         sessions.append_event(session, 'tool_result', name=call.name, result=tool_result)
         tool_results.append(tool_result)
-    # 生成下一轮输入：工具结果回灌
+    # 生成下一轮输入：只包含工具结果（LLM 自己上一轮说了什么无需重复）。
+    # 多个工具调用按响应中的书写顺序执行，结果的拼接顺序与之严格一致。
     parts = []
-    parts.append(('assistant', result.output))
     for i, tr in enumerate(tool_results):
         call = result.calls[i]
         if tr['ok']:
@@ -159,13 +159,8 @@ def check_terminal_task(session: dict):
         'text': output,
     }
     sessions.append_event(session, 'tool_result', name='terminal', result=result)
-    # 生成下一轮输入
+    # 生成下一轮输入：只包含工具结果
     parts = []
-    # 找到最近的 llm_output 文本
-    for e in reversed(session['events']):
-        if e['type'] == 'llm_output':
-            parts.append(('assistant', e['text']))
-            break
     if result['ok']:
         parts.append(('tool', f'工具 "terminal" 执行结果：\n{result["text"]}'))
     else:
@@ -194,10 +189,6 @@ def kill_terminal_task(session: dict) -> str:
     }
     sessions.append_event(session, 'tool_result', name='terminal', result=result)
     parts = []
-    for e in reversed(session['events']):
-        if e['type'] == 'llm_output':
-            parts.append(('assistant', e['text']))
-            break
     parts.append(('tool', f'工具 "terminal" 执行失败：{result["text"]}'))
     session['pending_input'] = protocol.render_turn_input(parts)
     session['last_error'] = None

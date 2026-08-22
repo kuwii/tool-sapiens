@@ -120,6 +120,32 @@ class ToolExecutionTest(unittest.TestCase):
         self.assertIsNotNone(self.session['pending_input'])
         self.assertIn('original content', self.session['pending_input'])
 
+    def test_next_input_excludes_assistant_output(self):
+        """下一轮输入只含工具结果，不重复上一轮响应的输出文本。"""
+        response = '我先读一下文件。\n<tool name="read"><path>a.txt</path></tool>'
+        loop.submit_response(self.session, response)
+        pending = self.session['pending_input']
+        self.assertIn('START OF TOOL', pending)
+        self.assertIn('original content', pending)
+        self.assertNotIn('START OF ASSISTANT', pending)
+        self.assertNotIn('我先读一下文件。', pending)
+
+    def test_multiple_tool_results_in_response_order(self):
+        """多个工具结果各占一个 C 字形，顺序与响应中工具调用顺序严格一致。"""
+        import os
+        with open(os.path.join(self.tmpdir, 'b.txt'), 'w') as f:
+            f.write('beta content')
+        text = (
+            '<tool name="read"><path>a.txt</path></tool>'
+            '<tool name="read"><path>b.txt</path></tool>'
+        )
+        loop.submit_response(self.session, text)
+        pending = self.session['pending_input']
+        self.assertEqual(pending.count('START OF TOOL'), 2)
+        self.assertNotIn('START OF ASSISTANT', pending)
+        self.assertLess(pending.index('original content'),
+                        pending.index('beta content'))
+
     def test_tool_events_appended(self):
         """工具调用和结果事件按顺序追加。"""
         loop.submit_response(self.session, '<tool name="read"><path>a.txt</path></tool>')
@@ -145,6 +171,7 @@ class ToolExecutionTest(unittest.TestCase):
         # pending_input 中包含两个工具的结果
         self.assertIn('original content', self.session['pending_input'])
         self.assertIn('a.txt', self.session['pending_input'])
+        self.assertNotIn('START OF ASSISTANT', self.session['pending_input'])
 
     def test_tool_error_result_in_next_input(self):
         """工具执行失败时，错误信息回灌到下一轮输入。"""
