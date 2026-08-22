@@ -89,7 +89,7 @@ python tool-sapiens.py --port <找到的端口>
 | 4 | LLM 页加载 | 导航到 `/llm` | 页面标题含"LLM"，左侧显示 system prompt + 用户消息 |
 | 5 | LLM 文字回复 | 在 LLM 页输入回复并提交 | 聊天页显示 LLM 回复，输入框恢复可用 |
 | 6 | list 工具 | LLM 响应中写 `<tool name="list"><path>.</path></tool>` | 工具结果列出目录文件 |
-| 7 | read 工具 | LLM 响应中写 `<tool name="read"><path>project-plan.md</path></tool>` | 工具结果返回文件内容 |
+| 7 | read 工具 | LLM 响应中写 `<tool name="read"><path>AGENTS.md</path></tool>` | 工具结果返回文件内容 |
 | 8 | create 工具 | LLM 响应中写 `<tool name="create"><path>test-output.txt</path><content>test</content></tool>` | 工具结果提示文件已创建 |
 | 9 | edit 工具 | LLM 响应中写 `<tool name="edit">` 修改上一步创建的文件 | 工具结果提示已替换 |
 | 10 | terminal 工具 | LLM 响应中写 `<tool name="terminal"><command>echo hello</command></tool>` | 工具结果包含 "hello" |
