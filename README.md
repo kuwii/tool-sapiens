@@ -8,7 +8,20 @@
 
 ![](./docs/the-demo.gif)
 
-## 启动
+## Agent 功能支持
+
+Tool Sapiens 具备一个 agent 该有的骨架：
+
+- **Agent Loop**：经典的状态机循环——用户提交提示词 → 生成输入（首轮含 system prompt）→ 等待"大模型"响应 → 解析工具调用 → 执行 → 结果回传进入下一轮，直到不再调用工具、给出最终回复。
+- **System Prompt 注入**：首轮对话自动生成 system prompt，说明响应格式与当前可用工具。
+- **工具调用**：内置五个工具——`list`（列目录）、`read`（读文件）、`create`（写新文件）、`edit`（精确文本替换）、`terminal`（执行 shell 命令）。一次响应可包含多个工具调用，按顺序依次执行。
+- **结构化输出协议**：以自定义 tag 协议解析"模型"的响应；tag 写坏时（缺闭合 tag、未知工具名、缺参数等）会收到说明性错误并要求重试。
+- **后台命令执行**：`terminal` 在后台线程运行，运行期间可随时终止（Windows 下按进程组杀，保证子进程树一起被清掉）。
+- **多会话与持久化**：支持多个并行 session；每个 session 一个 JSON 文件落盘，事件流 append-only 存储，重启后可继续。
+
+唯一的区别是：以上所有环节中的 LLM API 调用，都换成了你本人。
+
+## 如何使用
 
 ```bash
 python tool-sapiens.py [--port 8765]
