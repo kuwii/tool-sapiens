@@ -437,8 +437,19 @@ textarea:disabled {
   font-weight: 600;
 }
 
-.llm-input {
+.llm-input-wrap {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.llm-input-wrap .llm-input {
+  flex: 1;
+}
+
+.llm-input {
   margin: 0;
   overflow-y: auto;
   white-space: pre-wrap;
@@ -449,6 +460,16 @@ textarea:disabled {
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 10px;
+}
+
+.llm-input.placeholder {
+  color: var(--muted);
+  user-select: none;
+}
+
+#copy-input-btn {
+  flex: none;
+  width: 100%;
 }
 
 .response-input {

@@ -8,6 +8,7 @@ const responseInput = document.getElementById('response-input');
 const submitBtn = document.getElementById('submit-btn');
 const chatLink = document.getElementById('chat-link');
 const sessionListEl = document.getElementById('session-list');
+const copyInputBtn = document.getElementById('copy-input-btn');
 
 let currentSid = '';
 let lastPending = null;
@@ -18,23 +19,36 @@ let submitting = false;
 
 submitBtn.addEventListener('click', submitResponse);
 
-function setWorking(busy) {
-  responseInput.disabled = busy;
-  submitBtn.disabled = busy;
-  submitBtn.textContent = busy ? '提交中……' : '提交响应';
+/* 提交按钮状态：ready 可提交；busy 提交中；submitted 已提交（无待响应）；off 页面不可用 */
+function setSubmitMode(mode) {
+  responseInput.disabled = mode !== 'ready';
+  submitBtn.disabled = mode !== 'ready';
+  submitBtn.textContent =
+    mode === 'busy' ? '提交中……'
+    : mode === 'submitted' ? '已提交'
+    : '提交响应';
 }
+
+function setInputDisplay(text, isHint) {
+  inputEl.textContent = text;
+  inputEl.classList.toggle('placeholder', !!isHint);
+}
+
+copyInputBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(inputEl.textContent);
+});
 
 async function submitResponse() {
   if (!currentSid || submitting) {
     return;
   }
   submitting = true;
-  setWorking(true);
+  setSubmitMode('busy');
   const result = await api('POST', `/api/llm/${currentSid}/response`,
     { response: responseInput.value });
   submitting = false;
-  setWorking(false);
   if (!result.ok) {
+    setSubmitMode('ready');
     errorEl.textContent = errorMessage(result);
     errorEl.hidden = false;
     return;
@@ -53,10 +67,11 @@ async function poll() {
     currentSid = '';
     lastPending = null;
     lastError = undefined;
-    inputEl.textContent = '还没有 session。去聊天页（/）新建一个，然后回这里扮演 LLM。';
+    setInputDisplay('还没有 session。去聊天页（/）新建一个，然后回这里扮演 LLM。', true);
     sessionStateEl.textContent = '无 session';
     errorEl.hidden = true;
-    setWorking(true);
+    copyInputBtn.hidden = true;
+    setSubmitMode('off');
     chatLink.hidden = true;
     return;
   }
@@ -82,9 +97,10 @@ async function poll() {
   if (!exists) {
     currentSid = '';
     lastPending = null;
-    inputEl.textContent = `session ${sid} 不存在`;
+    setInputDisplay(`session ${sid} 不存在`, true);
     sessionStateEl.textContent = '404';
-    setWorking(true);
+    copyInputBtn.hidden = true;
+    setSubmitMode('off');
     return;
   }
 
@@ -92,9 +108,10 @@ async function poll() {
   if (result.status === 404) {
     currentSid = '';
     lastPending = null;
-    inputEl.textContent = `session ${sid} 不存在`;
+    setInputDisplay(`session ${sid} 不存在`, true);
     sessionStateEl.textContent = '404';
-    setWorking(true);
+    copyInputBtn.hidden = true;
+    setSubmitMode('off');
     return;
   }
   if (!result.ok) {
@@ -106,22 +123,26 @@ async function poll() {
   if (view.state === 'executing') {
     sessionStateEl.textContent = 'terminal 命令执行中……（聊天页可见终止按钮）';
     if (view.terminal_status) {
-      inputEl.textContent = `[执行中]\n命令输出（实时更新）：\n${view.terminal_status.output || '(暂无输出)'}`;
+      setInputDisplay(`[执行中]\n命令输出（实时更新）：\n${view.terminal_status.output || '(暂无输出)'}`, false);
       inputEl.scrollTop = inputEl.scrollHeight;
     }
-    setWorking(true);
+    copyInputBtn.hidden = true;
+    setSubmitMode('busy');
   } else if (view.state === 'awaiting_llm') {
     sessionStateEl.textContent = '轮到你了：阅读左侧输入，在右侧写下响应';
     if (view.pending_input !== lastPending) {
       lastPending = view.pending_input;
-      inputEl.textContent = view.pending_input
-        || '（当前没有待处理的输入）';
+      setInputDisplay(view.pending_input || '等待用户输入', !view.pending_input);
       inputEl.scrollTop = 0;
     }
-    setWorking(false);
+    copyInputBtn.hidden = !view.pending_input;
+    setSubmitMode(view.pending_input ? 'ready' : 'submitted');
   } else {
     sessionStateEl.textContent = '等待用户在聊天页提交新的提示词……';
-    setWorking(true);
+    lastPending = null;
+    setInputDisplay('等待用户输入', true);
+    copyInputBtn.hidden = true;
+    setSubmitMode('submitted');
   }
   if (view.last_error !== lastError) {
     lastError = view.last_error;
