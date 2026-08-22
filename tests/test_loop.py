@@ -14,7 +14,7 @@ class SubmitPromptTest(unittest.TestCase):
         pending = loop.submit_prompt(self.session, '你好')
         self.assertEqual(self.session['state'], 'awaiting_llm')
         self.assertEqual(pending, self.session['pending_input'])
-        self.assertIn('── SYSTEM', pending)
+        self.assertIn('START OF SYSTEM', pending)
         self.assertIn('你好', pending)
         self.assertIsNone(self.session['last_error'])
 
@@ -28,7 +28,7 @@ class SubmitPromptTest(unittest.TestCase):
         loop.submit_prompt(self.session, '第一条')
         loop.submit_response(self.session, '收到')
         loop.submit_prompt(self.session, '第二条')
-        self.assertNotIn('── SYSTEM', self.session['pending_input'])
+        self.assertNotIn('START OF SYSTEM', self.session['pending_input'])
         self.assertIn('第二条', self.session['pending_input'])
 
     def test_prompt_is_stripped(self):

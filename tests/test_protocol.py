@@ -18,11 +18,19 @@ SPECS = {
 class RenderTurnInputTest(unittest.TestCase):
     def test_first_turn_has_system_and_user(self):
         text = protocol.render_turn_input([('system', 'SYS'), ('user', '你好')])
-        self.assertEqual(text, '┌── SYSTEM\n│ SYS\n└─────────\n\n┌── USER\n│ 你好\n└───────')
+        self.assertEqual(
+            text,
+            '┌---- START OF SYSTEM -----\n│ SYS\n└----- END OF SYSTEM ------'
+            '\n\n'
+            '┌---- START OF USER -----\n│ 你好\n└----- END OF USER ------',
+        )
 
     def test_single_part(self):
         text = protocol.render_turn_input([('user', '只有这段')])
-        self.assertEqual(text, '┌── USER\n│ 只有这段\n└───────')
+        self.assertEqual(
+            text,
+            '┌---- START OF USER -----\n│ 只有这段\n└----- END OF USER ------',
+        )
 
 
 class BuildSystemPromptTest(unittest.TestCase):

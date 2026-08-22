@@ -46,25 +46,18 @@ def _render_part(role: str, content: str) -> str:
     """将单个部分渲染为 C 字形包围的格式（上、左、下，无右边框）。
 
     例:
-        ┌── SYSTEM─────────────────────────────
+        ┌---- START OF SYSTEM -----
         │ You are a helpful assistant.
-        └──────────────────────────────────────
+        └----- END OF SYSTEM ------
 
-    header 宽度对齐到最长内容行（"│ " + content），短则补 ─。
+    上下边为固定长度：上边左 4 右 5 个 '-'，下边左 5 右 6 个 '-'，
+    恰与 START / END 的长度差抵消，上下等宽；不随正文长度变化。
     """
     label = _ROLE_LABELS.get(role, role.upper())
-    lines = content.split('\n')
-    max_content_len = max(len(line) for line in lines)
-    # 内容行总长 = "│ "(2) + max_content_len
-    content_line_len = 2 + max_content_len
-    header_prefix = f'── {label}'
-    # 整行最小总长：至少容纳 "┌" + header_prefix，也至少和内容行等宽
-    min_total = max(1 + len(header_prefix), content_line_len)
-    dash_count = min_total - 1 - len(header_prefix)
-    result_lines = ['┌' + header_prefix + '─' * dash_count]
-    for line in lines:
+    result_lines = [f'┌---- START OF {label} -----']
+    for line in content.split('\n'):
         result_lines.append(f'│ {line}')
-    result_lines.append('└' + '─' * (min_total - 1))
+    result_lines.append(f'└----- END OF {label} ------')
     return '\n'.join(result_lines)
 
 
