@@ -7,29 +7,12 @@ const errorEl = document.getElementById('last-error');
 const responseInput = document.getElementById('response-input');
 const submitBtn = document.getElementById('submit-btn');
 const chatLink = document.getElementById('chat-link');
-const newSessionBtn = document.getElementById('new-session');
 const sessionListEl = document.getElementById('session-list');
 
 let currentSid = '';
 let lastPending = null;
 let lastError = undefined; // 与 null 区分：undefined = 还没轮询过
 let submitting = false;
-
-/* ── 新建 session ── */
-
-newSessionBtn.addEventListener('click', async () => {
-  const result = await api('POST', '/api/sessions');
-  if (!result.ok) {
-    sessionStateEl.textContent = errorMessage(result);
-    return;
-  }
-  setSessionId(result.data.session.meta.id);
-  responseInput.value = '';
-  lastPending = null;
-  lastError = undefined;
-  errorEl.hidden = true;
-  sessionStateEl.textContent = '';
-});
 
 /* ── 提交响应 ── */
 
