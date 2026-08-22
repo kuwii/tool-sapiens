@@ -136,6 +136,7 @@ class Handler(BaseHTTPRequestHandler):
             'state': session['state'],
             'pending_input': session['pending_input'],
             'last_error': session['last_error'],
+            'full_input': loop.render_full_input(session),
         }
         if session['state'] == 'executing':
             task = session.get('terminal_task')

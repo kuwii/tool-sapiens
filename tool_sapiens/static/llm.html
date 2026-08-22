@@ -23,6 +23,11 @@
     <div class="content">
       <section class="panel">
         <h2>给 LLM 的输入</h2>
+        <div class="input-mode-bar">
+          <button id="mode-full-btn" class="btn mode-btn">全量输入</button>
+          <button id="mode-latest-btn" class="btn mode-btn">仅最新</button>
+        </div>
+        <div id="input-note" class="input-note" hidden></div>
         <div class="llm-input-wrap">
           <pre id="llm-input" class="llm-input">加载中……</pre>
           <button id="copy-input-btn" class="btn" hidden>复制</button>

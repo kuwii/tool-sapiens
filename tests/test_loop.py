@@ -204,5 +204,73 @@ class ToolExecutionTest(unittest.TestCase):
         self.assertIsNone(self.session['pending_input'])
 
 
+class RenderFullInputTest(unittest.TestCase):
+    """render_full_input：从事件流重建全量输入（完整 messages 列表）。"""
+
+    def setUp(self):
+        import os
+        import tempfile
+        from tool_sapiens import tools
+        self.tmpdir = tempfile.mkdtemp()
+        tools.set_work_dir(self.tmpdir)
+        # 替换全局指令路径，避免读到本机真实配置
+        self._orig_global_path = loop.GLOBAL_AGENTS_PATH
+        loop.GLOBAL_AGENTS_PATH = os.path.join(self.tmpdir, 'global-AGENTS.md')
+        with open(os.path.join(self.tmpdir, 'a.txt'), 'w') as f:
+            f.write('original content')
+        self.session = sessions.create_session()
+
+    def tearDown(self):
+        import shutil
+        loop.GLOBAL_AGENTS_PATH = self._orig_global_path
+        shutil.rmtree(self.tmpdir)
+
+    def test_empty_session_returns_none(self):
+        self.assertIsNone(loop.render_full_input(self.session))
+
+    def test_first_turn_matches_pending_input(self):
+        """首轮时全量输入与 pending_input 完全一致。"""
+        pending = loop.submit_prompt(self.session, '你好')
+        full = loop.render_full_input(self.session)
+        self.assertEqual(full, pending)
+
+    def test_includes_assistant_and_tool_blocks_in_order(self):
+        loop.submit_prompt(self.session, '帮我读文件')
+        loop.submit_response(
+            self.session,
+            '我先读一下。\n<tool name="read"><path>a.txt</path></tool>')
+        loop.submit_response(self.session, '文件内容是 original content。')
+        loop.submit_prompt(self.session, '再总结一下')
+        full = loop.render_full_input(self.session)
+        # 各角色块都在，按时间顺序排列
+        self.assertIn('START OF SYSTEM', full)
+        self.assertIn('START OF ASSISTANT', full)
+        self.assertIn('我先读一下。', full)
+        self.assertIn('START OF TOOL', full)
+        self.assertIn('original content', full)
+        self.assertLess(full.index('START OF SYSTEM'), full.index('START OF USER'))
+        self.assertLess(full.index('START OF USER'), full.index('START OF ASSISTANT'))
+        self.assertLess(full.index('START OF ASSISTANT'), full.index('START OF TOOL'))
+        self.assertLess(full.index('START OF TOOL'), full.rindex('START OF USER'))
+        # 两条 user_prompt 都在
+        self.assertEqual(full.count('START OF USER'), 2)
+        self.assertIn('帮我读文件', full)
+        self.assertIn('再总结一下', full)
+
+    def test_broken_response_never_appears(self):
+        """写坏被拒的响应没有事件，全量输入中不出现。"""
+        loop.submit_prompt(self.session, '你好')
+        loop.submit_response(self.session, '<tool name=bad>')  # 写坏
+        full = loop.render_full_input(self.session)
+        self.assertNotIn('START OF ASSISTANT', full)
+
+    def test_failed_tool_result_marked(self):
+        loop.submit_prompt(self.session, '帮我读文件')
+        loop.submit_response(
+            self.session, '<tool name="read"><path>no-such.txt</path></tool>')
+        full = loop.render_full_input(self.session)
+        self.assertIn('执行失败', full)
+
+
 if __name__ == '__main__':
     unittest.main()

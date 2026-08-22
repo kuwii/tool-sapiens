@@ -83,6 +83,39 @@ class LoopError(Exception):
         self.status = status
 
 
+def _tool_result_part(name: str, result: dict) -> tuple:
+    """工具结果 → 一个 ('tool', 正文) 输入段。"""
+    if result['ok']:
+        return ('tool', f'工具 "{name}" 执行结果：\n{result["text"]}')
+    return ('tool', f'工具 "{name}" 执行失败：{result["text"]}')
+
+
+def render_full_input(session: dict) -> str | None:
+    """从持久化事件流重建整个对话的全量输入。
+
+    模拟真实 LLM API 的无状态调用：每次发送完整 messages 列表。
+    system prompt、注入的指令、每条 user_prompt / llm_output /
+    tool_result 按时间顺序各占一个 C 字形块；写坏被拒的响应没有
+    事件，自然不会出现。没有任何输入时返回 None。
+    """
+    parts = []
+    for event in session['events']:
+        etype = event['type']
+        if etype == 'user_prompt':
+            if not any(p[0] == 'system' for p in parts):
+                parts.append(('system', protocol.build_system_prompt(TOOL_SPECS)))
+                parts.extend(_instruction_parts(tools.work_dir))
+            parts.append(('user', event['text']))
+        elif etype == 'llm_output':
+            parts.append(('assistant', event['text']))
+        elif etype == 'tool_result':
+            parts.append(_tool_result_part(event['name'], event['result']))
+    if not parts:
+        return None
+    rendered = protocol.render_turn_input(parts)
+    return FIRST_TURN_PREAMBLE + '\n\n' + rendered
+
+
 def submit_prompt(session: dict, text: str) -> str:
     """idle 时提交用户提示词，生成本轮输入并进入 awaiting_llm。
 
@@ -168,13 +201,8 @@ def submit_response(session: dict, text: str):
         tool_results.append(tool_result)
     # 生成下一轮输入：只包含工具结果（LLM 自己上一轮说了什么无需重复）。
     # 多个工具调用按响应中的书写顺序执行，结果的拼接顺序与之严格一致。
-    parts = []
-    for i, tr in enumerate(tool_results):
-        call = result.calls[i]
-        if tr['ok']:
-            parts.append(('tool', f'工具 "{call.name}" 执行结果：\n{tr["text"]}'))
-        else:
-            parts.append(('tool', f'工具 "{call.name}" 执行失败：{tr["text"]}'))
+    parts = [_tool_result_part(call.name, tr)
+             for call, tr in zip(result.calls, tool_results)]
     session['pending_input'] = protocol.render_turn_input(parts)
     session['last_error'] = None
     # 状态保持 awaiting_llm，等待 LLM 根据工具结果继续响应
@@ -205,12 +233,8 @@ def check_terminal_task(session: dict):
     }
     sessions.append_event(session, 'tool_result', name='terminal', result=result)
     # 生成下一轮输入：只包含工具结果
-    parts = []
-    if result['ok']:
-        parts.append(('tool', f'工具 "terminal" 执行结果：\n{result["text"]}'))
-    else:
-        parts.append(('tool', f'工具 "terminal" 执行失败：{result["text"]}'))
-    session['pending_input'] = protocol.render_turn_input(parts)
+    session['pending_input'] = protocol.render_turn_input(
+        [_tool_result_part('terminal', result)])
     session['last_error'] = None
     session['state'] = 'awaiting_llm'
     session['terminal_task'] = None
@@ -233,9 +257,8 @@ def kill_terminal_task(session: dict) -> str:
         'text': output + '\n(进程已被终止)',
     }
     sessions.append_event(session, 'tool_result', name='terminal', result=result)
-    parts = []
-    parts.append(('tool', f'工具 "terminal" 执行失败：{result["text"]}'))
-    session['pending_input'] = protocol.render_turn_input(parts)
+    session['pending_input'] = protocol.render_turn_input(
+        [_tool_result_part('terminal', result)])
     session['last_error'] = None
     session['state'] = 'awaiting_llm'
     session['terminal_task'] = None

@@ -467,6 +467,39 @@ textarea:disabled {
   user-select: none;
 }
 
+/* 全量输入在等待新提示词期间的变暗态：仍可滚动、选中、复制 */
+.llm-input.dimmed {
+  color: var(--muted);
+}
+
+/* 输入模式切换（全量输入 / 仅最新） */
+.input-mode-bar {
+  flex: none;
+  display: flex;
+  gap: 8px;
+}
+
+.mode-btn {
+  padding: 4px 14px;
+  font-size: 13px;
+  border-radius: 999px;
+}
+
+.mode-btn.active {
+  border-color: var(--accent);
+  background: var(--bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* 按钮与文本框之间的说明条 */
+.input-note {
+  flex: none;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
 #copy-input-btn {
   flex: none;
   width: 100%;
