@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+import os
+
 from . import protocol
 from . import sessions
 from . import tools
@@ -30,6 +32,47 @@ FIRST_TURN_PREAMBLE = (
     '那个空格拼进正文（例如 edit 工具的 old/new 参数必须与正文完全一致，'
     '不含边框）。'
 )
+
+
+# 全局指令文件路径：~/.config/tool-sapiens/AGENTS.md。
+# 模块级变量，测试可替换。
+GLOBAL_AGENTS_PATH = os.path.join(
+    os.path.expanduser('~'), '.config', 'tool-sapiens', 'AGENTS.md')
+
+
+def _read_text(path: str) -> str | None:
+    """读取文件全文；不存在或读取失败返回 None（调用方静默跳过）。"""
+    try:
+        with open(path, encoding='utf-8') as f:
+            return f.read()
+    except OSError:
+        return None
+
+
+def _instruction_parts(work_dir: str) -> list:
+    """收集全局 / 项目级指令，各作为一个 (user, 正文) 段。
+
+    - 全局：~/.config/tool-sapiens/AGENTS.md；
+    - 项目：<工作目录>/AGENTS.md。
+    文件不存在或读取失败时跳过；内容为空白时也跳过（空块无意义）。
+    """
+    parts = []
+    sources = [
+        (GLOBAL_AGENTS_PATH,
+         '以下是全局指令（来自 ~/.config/tool-sapiens/AGENTS.md），'
+         '适用于所有会话，请遵守：'),
+    ]
+    if work_dir:
+        sources.append(
+            (os.path.join(work_dir, 'AGENTS.md'),
+             '以下是项目级指令（来自当前工作目录的 AGENTS.md），'
+             '请在本项目中遵守：'))
+    for path, header in sources:
+        text = _read_text(path)
+        if text is None or not text.strip():
+            continue
+        parts.append(('user', f'{header}\n\n{text.rstrip()}'))
+    return parts
 
 
 class LoopError(Exception):
@@ -58,6 +101,8 @@ def submit_prompt(session: dict, text: str) -> str:
     parts = []
     if first_turn:
         parts.append(('system', protocol.build_system_prompt(TOOL_SPECS)))
+        # 全局 / 项目级指令各占一个独立的 USER 块，插在 system 与用户提示词之间
+        parts.extend(_instruction_parts(tools.work_dir))
     parts.append(('user', text))
     rendered = protocol.render_turn_input(parts)
     if first_turn:
